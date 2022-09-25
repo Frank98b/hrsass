@@ -6,7 +6,7 @@ import 'nprogress/nprogress.css' // 引入进度条样式
 
 const whiteList = ['/login', '/404'] // 白名单路由
 // 路由前置守卫
-router.beforeEach(function(to, from, next) {
+router.beforeEach(async function(to, from, next) {
   // 判断是否有token
   if (store.getters.token) {
   // 有token，判断是否是去登录页
@@ -14,7 +14,11 @@ router.beforeEach(function(to, from, next) {
       // 有token，去登录页，直接免登录，跳转至主页
       next('/')
     } else {
-      // 有token，不去登录页，直接放行
+      if (!store.getters.userId) {
+        // 如果没有id这个值 才会调用 vuex的获取资料的action
+        await store.dispatch('user/getUserInfo')
+        // 为什么要写await 因为我们想获取完资料再去放行
+      }
       next()
     }
   } else {
