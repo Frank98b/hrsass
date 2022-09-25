@@ -1,3 +1,38 @@
+// 权限拦截 导航守卫 路由守卫  router
+import router from '@/router' // 引入路由实例
+import store from '@/store' // 引入token
+import NProgress from 'nprogress' // 引入一份进度条插件
+import 'nprogress/nprogress.css' // 引入进度条样式
+
+const whiteList = ['/login', '/404'] // 白名单路由
+// 路由前置守卫
+router.beforeEach(function(to, from, next) {
+  // 判断是否有token
+  if (store.getters.token) {
+  // 有token，判断是否是去登录页
+    if (to.path === '/login') {
+      // 有token，去登录页，直接免登录，跳转至主页
+      next('/')
+    } else {
+      // 有token，不去登录页，直接放行
+      next()
+    }
+  } else {
+    // 没有token，判断目标路由是否在白名单列表，使用数组indexOf方法，能拿到索引则索引值一定大于-1
+    if (whiteList.indexOf(to.path) > -1) {
+      // 在白名单内，直接放行
+      next()
+    } else {
+      // 没有token，且访问路由不在白名单内，跳转至登录页面
+      next('/login')
+    }
+  }
+  NProgress.done() // 避免手动切换路由时，进度条不关闭，手动强制关闭一次
+})
+
+router.afterEach(function() {
+  NProgress.done() // 关闭进度条
+})
 // import router from './router'
 // import store from './store'
 // import { Message } from 'element-ui'
